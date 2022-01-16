@@ -8,6 +8,9 @@ spring:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     hibernate:
       ddl-auto: update
+  profiles:
+    include:
+      - KEY
 
 mybatis:
   type-aliases-package: com.mkkang.mbti_with_music.domain

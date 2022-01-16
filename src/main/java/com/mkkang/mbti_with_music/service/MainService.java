@@ -6,6 +6,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.mkkang.mbti_with_music.domain.MusicInfo;
 import com.mkkang.mbti_with_music.domain.UserMusic;
@@ -21,6 +22,9 @@ public class MainService {
     @Autowired
     private MainMapper mainMapper;
 
+    @Value("${key}")
+    private String key;
+
     public List<MusicInfo> allMusic() {
         List<MusicInfo> musicList = mainMapper.allMusic();
         return musicList;
@@ -30,7 +34,7 @@ public class MainService {
         WebClient webClient = WebClient.create("https://www.googleapis.com/youtube/v3/search");
         Mono<Object> searchedMusic = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .queryParam("key", "AIzaSyAgsa32-SWrq_cLaBsAUe_1IeFa3gqVDTs")
+                        .queryParam("key", key)
                         .queryParam("part", "snippet")
                         .queryParam("type", "video")
                         .queryParam("videoCategoryId", "10")
