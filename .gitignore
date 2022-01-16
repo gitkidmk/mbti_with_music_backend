@@ -37,3 +37,4 @@ out/
 .vscode/
 
 **/src/main/resources/application-KEY.yml
+**/src/main/resources/META-INF
