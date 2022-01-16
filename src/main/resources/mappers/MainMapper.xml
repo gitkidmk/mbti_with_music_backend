@@ -7,4 +7,32 @@
     <select id="allMusic" resultType="com.mkkang.mbti_with_music.domain.MusicInfo">
         SELECT * FROM music
     </select>
+
+    <insert id="musicRecommendation" parameterType="com.mkkang.mbti_with_music.domain.UserMusic">
+        INSERT INTO
+        mbti_music_user(music_id, mbti_name)
+        VALUES(
+            #{music_id}, 
+            #{mbti_name}
+            )
+    </insert>
+
+    <insert id="musicThumbsup" parameterType="com.mkkang.mbti_with_music.domain.UserMusic">
+        INSERT INTO
+        mbti_music_great(music_id, session_id, mbti_name)
+        VALUES(
+            #{music_id}, 
+            #{session_id},
+            #{mbti_name}
+            )
+    </insert>
+
+    <select id="getMbtiMusic" resultType="com.mkkang.mbti_with_music.domain.MusicInfo" parameterType="string">
+        SELECT m.music_id, m.music_name, m.album, m.artist, count(mmg.mbti_music_great_id) as great_count
+        FROM music m, mbti_music_great mmg
+        WHERE m.music_id = mmg.music_id
+        AND mmg.mbti_name = #{mbti_name}
+        GROUP BY m.music_id
+    </select>
+
 </mapper>
