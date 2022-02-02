@@ -21,8 +21,8 @@ public class MainService {
 
     @Autowired
     private MainMapper mainMapper;
-    @Autowired
-    public UserMBTI userMBTI;
+
+    UserMBTI userMBTI = new UserMBTI();
 
     @Value("${key}")
     private String key;
