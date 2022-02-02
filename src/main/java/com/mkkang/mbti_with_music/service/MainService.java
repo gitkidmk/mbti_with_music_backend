@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.mkkang.mbti_with_music.domain.MusicInfo;
 import com.mkkang.mbti_with_music.domain.UserMusic;
 import com.mkkang.mbti_with_music.mapper.MainMapper;
-
+import com.mkkang.mbti_with_music.domain.UserMBTI;
 
 
 import java.util.List;
@@ -21,6 +21,8 @@ public class MainService {
 
     @Autowired
     private MainMapper mainMapper;
+    @Autowired
+    public UserMBTI userMBTI;
 
     @Value("${key}")
     private String key;
@@ -54,9 +56,114 @@ public class MainService {
         return mainMapper.musicThumbsup(userMusic);
     }
     
-    public List<MusicInfo> mbtiMusic(UserMusic userMusic) {
-        List<MusicInfo> results = mainMapper.getMbtiMusic(userMusic.getMbti_name());
+    public MusicInfo[] mbtiMusic(String MBTI_name) {
+        MusicInfo[] results = mainMapper.getMbtiMusic(MBTI_name);
+        for (MusicInfo r: results){
+            r.getMusic_id();
+        }
         return results;
+    }
+
+    public UserMBTI mbtiResult(String question_set, int[] answer) {
+        //특정 set에 대한 문항 정보 가져오기
+        // weight[], 4가지 unit에 대한 summation
+        // UserMBTI userMBTI
+
+        int[] weight = mainMapper.getWeight(question_set);
+        int[] unit_total = mainMapper.getUnitTotal(question_set);
+        String topResult = "";
+
+        double E, N, T, J;
+        E = 0;
+        N = 0;
+        T = 0;
+        J = 0;
+
+        for (int i = 0; i < answer.length; i++) {
+            int val = weight[i] * answer[i];
+            if (i % 4 == 0) {
+                E += val;
+            } else if (i % 4 == 1) {
+                N += val;
+            } else if (i % 4 == 2) {
+                T += val;
+            } else if (i % 4 == 3) {
+                J += val;
+            }
+        }
+        
+        E = E / unit_total[0];
+        N = N / unit_total[1];
+        T = T / unit_total[2];
+        J = J / unit_total[3];
+
+        topResult += (E >= 0) ? "E" : "I";
+        topResult += (N >= 0) ? "N" : "S";
+        topResult += (T >= 0) ? "T" : "F";
+        topResult += (J >= 0) ? "J" : "P";
+
+        double[] topResultDetail={E,N,T,J};
+
+        /*
+        ENTJ    ++++
+        ENTP    +++-
+        ENFJ    ++-+
+        ENFP    ++--
+        ESTJ    +-++
+        ESTP    +-+-
+        ESFJ    +--+
+        ESFP    +---
+        ISFP    ----
+        ISFJ    ---+
+        ISTP    --+-
+        ISTJ    --++
+        INFP    -+--
+        INFJ    -+-+
+        INTP    -++-
+        INTJ    -+++        
+        */
+
+        double ENTJ = (+E + N + T + J + 4) / 8 * 100;
+        double ENTP = (+E + N + T - J + 4) / 8 * 100;
+        double ENFJ = (+E + N - T + J + 4) / 8 * 100;
+        double ENFP = (+E + N - T - J + 4) / 8 * 100;
+        double ESTJ = (+E - N + T + J + 4) / 8 * 100;
+        double ESTP = (+E - N + T - J + 4) / 8 * 100;
+        double ESFJ = (+E - N - T + J + 4) / 8 * 100;
+        double ESFP = (+E - N - T - J + 4) / 8 * 100;
+        double ISFP = (-E - N - T - J + 4) / 8 * 100;
+        double ISFJ = (-E - N - T + J + 4) / 8 * 100;
+        double ISTP = (-E - N + T - J + 4) / 8 * 100;
+        double ISTJ = (-E - N + T + J + 4) / 8 * 100;
+        double INFP = (-E + N - T - J + 4) / 8 * 100;
+        double INFJ = (-E + N - T + J + 4) / 8 * 100;
+        double INTP = (-E + N + T - J + 4) / 8 * 100;
+        double INTJ = (-E + N + T + J + 4) / 8 * 100;
+
+        double[] allResult = {
+            ENTJ,
+            ENTP,
+            ENFJ,
+            ENFP,
+            ESTJ,
+            ESTP,
+            ESFJ,
+            ESFP,
+            ISFP,
+            ISFJ,
+            ISTP,
+            ISTJ,
+            INFP,
+            INFJ,
+            INTP,
+            INTJ
+        };
+
+        userMBTI.setTopResult(topResult);
+        userMBTI.setAllResult(allResult);
+        userMBTI.setTopResultDetail(topResultDetail);
+
+        return userMBTI;
     }
     
 }
