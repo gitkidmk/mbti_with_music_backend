@@ -35,4 +35,17 @@
         GROUP BY m.music_id
     </select>
 
+    <select id="getWeight" resultType="int" parameterType="string">
+        SELECT mq.weight from mbti_question mq
+        WHERE mq.question_set = #{question_set}
+        ORDER BY mq.id;
+    </select>
+
+    <select id="getUnitTotal" resultType="int" parameterType="string">
+        SELECT sum(mq.weight) from  mbti_question mq
+        WHERE mq.question_set = #{question_set}
+        GROUP BY mq.unit
+        ORDER BY field(mq.unit, 'E', 'N', 'T', 'J');
+    </select>
+
 </mapper>

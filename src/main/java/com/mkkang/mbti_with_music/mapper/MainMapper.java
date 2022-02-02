@@ -15,5 +15,9 @@ public interface MainMapper {
 
     public int musicThumbsup(UserMusic userMusic);
 
-    public List<MusicInfo> getMbtiMusic(String mbti_name);
+    public MusicInfo[] getMbtiMusic(String mbti_name);
+
+    public int[] getWeight(String question_set);
+
+    public int[] getUnitTotal(String question_set);
 }
