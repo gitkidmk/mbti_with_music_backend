@@ -66,15 +66,19 @@ public class MainController {
         return music_result;
     }
 
+    // 없어도 되는 api
     @RequestMapping(method = RequestMethod.POST, path = "/music/recommendation")
     public int musicRecommendation(@RequestBody UserMusic userMusic) {
         int musicResult = mainService.musicRecommendation(userMusic);
         return musicResult;
     }
-
+    
+    // music table에 pass 여부 column필요
     @RequestMapping(method = RequestMethod.POST, path = "/music/thumbs-up")
     public int musicThumbsup(@RequestBody UserMusic userMusic) {
+        System.out.println("thumbs-up START");
         int thumbsupResult = mainService.musicThumbsup(userMusic);
+        System.out.println("thumbs-up END");
         return thumbsupResult;
     }
 

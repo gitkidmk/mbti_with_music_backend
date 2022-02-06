@@ -17,6 +17,21 @@
             )
     </insert>
 
+    <select id="isMusicExist" resultType="int" parameterType="string">
+        SELECT count(*) FROM music
+        WHERE music_id = #{music_id}
+    </select>
+    
+    <insert id="insertNewMusic" parameterType="com.mkkang.mbti_with_music.domain.UserMusic">
+        INSERT into
+        music(music_id, music_name, thumbnail)
+        VALUES(
+            #{music_id},
+            #{music_name},
+            #{thumbnail}
+            )
+    </insert>
+
     <insert id="musicThumbsup" parameterType="com.mkkang.mbti_with_music.domain.UserMusic">
         INSERT INTO
         mbti_music_great(music_id, session_id, mbti_name)
@@ -28,7 +43,7 @@
     </insert>
 
     <select id="getMbtiMusic" resultType="com.mkkang.mbti_with_music.domain.MusicInfo" parameterType="string">
-        SELECT m.music_id, m.music_name, m.album, m.artist, count(mmg.mbti_music_great_id) as great_count
+        SELECT m.music_id, m.music_name, m.album, m.artist, m.thumbnail, count(mmg.mbti_music_great_id) as great_count
         FROM music m, mbti_music_great mmg
         WHERE m.music_id = mmg.music_id
         AND mmg.mbti_name = #{mbti_name}

@@ -8,5 +8,6 @@ public class MusicInfo {
     private String music_name;
     private String album;
     private String artist;
+    private String thumbnail;
     private int great_count;
 }

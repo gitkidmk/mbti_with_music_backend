@@ -48,11 +48,21 @@ public class MainService {
         return searchedMusic.block();
     }
     
-    public int musicRecommendation(UserMusic userMusic) {      
+    public int musicRecommendation(UserMusic userMusic) {
         return mainMapper.musicRecommendation(userMusic);
     }
 
-    public int musicThumbsup(UserMusic userMusic) {
+    public int musicThumbsup(UserMusic userMusic) {        
+        System.out.println("thumbs-up service start");
+        int musicExist = mainMapper.isMusicExist(userMusic.getMusic_id());
+        int insertMusic = 0;
+        // 있으면 1 없으면 0인가??? >> count로 체크하면 가능?
+        System.out.println("musicExist" + musicExist);
+        if (musicExist == 0) {
+            // videoId만 주기??
+            insertMusic = mainMapper.insertNewMusic(userMusic);
+            System.out.println("insertMusic" + insertMusic);
+        }
         return mainMapper.musicThumbsup(userMusic);
     }
     
@@ -102,7 +112,7 @@ public class MainService {
         topResult += (T >= 0) ? "T" : "F";
         topResult += (J >= 0) ? "J" : "P";
 
-        double[] topResultDetail={E,N,T,J};
+        double[] topResultDetail={Math.abs(E),Math.abs(N),Math.abs(T),Math.abs(J)};
 
         /*
         ENTJ    ++++

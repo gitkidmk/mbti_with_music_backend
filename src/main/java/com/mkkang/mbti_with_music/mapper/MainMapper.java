@@ -13,6 +13,10 @@ public interface MainMapper {
 
     public int musicRecommendation(UserMusic userMusic);
 
+    public int isMusicExist(String music_id);
+
+    public int insertNewMusic(UserMusic userMusic);
+
     public int musicThumbsup(UserMusic userMusic);
 
     public MusicInfo[] getMbtiMusic(String mbti_name);
