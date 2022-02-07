@@ -40,6 +40,7 @@ public class MainService {
                         .queryParam("part", "snippet")
                         .queryParam("type", "video")
                         .queryParam("videoCategoryId", "10")
+                        .queryParam("maxResults", "10")
                         .queryParam("q", music_name)
                         .build())
                 .retrieve()
