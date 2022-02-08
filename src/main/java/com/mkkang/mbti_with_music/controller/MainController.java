@@ -80,14 +80,6 @@ public class MainController {
         System.out.println("thumbs-up END");
         return thumbsupResult;
     }
-
-    // @RequestMapping(method=RequestMethod.POST, path="/mbti-results")
-    // public List<MusicInfo> mbtiResult(@RequestBody UserMusic userMusic) {
-    // List<MusicInfo> mbti_results = mainService.mbtiMusic(userMusic);
-    // return mbti_results;
-    // }
-    // String[] listType = new TypeToken<String[]>() {}.getType();
-
     @RequestMapping(method = RequestMethod.POST, path = "/mbti-results")
     public String mbtiResult(@RequestBody UserMBTI userMBTI) {
 

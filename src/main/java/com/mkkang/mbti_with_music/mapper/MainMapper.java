@@ -1,8 +1,9 @@
 package com.mkkang.mbti_with_music.mapper;
- 
+
 import java.util.List;
 
 import com.mkkang.mbti_with_music.domain.MusicInfo;
+import com.mkkang.mbti_with_music.domain.UserMBTIResult;
 import com.mkkang.mbti_with_music.domain.UserMusic;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -16,6 +17,8 @@ public interface MainMapper {
     public int isMusicExist(String music_id);
 
     public int insertNewMusic(UserMusic userMusic);
+
+    public int insertMbtiResult(UserMBTIResult userMBTIResult);
 
     public int musicThumbsup(UserMusic userMusic);
 

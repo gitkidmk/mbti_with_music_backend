@@ -31,6 +31,19 @@
             #{thumbnail}
             )
     </insert>
+    
+    <insert id="insertMbtiResult" parameterType="com.mkkang.mbti_with_music.domain.UserMBTIResult">
+        INSERT into
+        mbti_result(mbti, EI, NS, TF, JP, time)
+        VALUES(
+            #{mbti},
+            #{EI},
+            #{NS},
+            #{TF},
+            #{JP},
+            #{time}
+            )
+    </insert>
 
     <insert id="musicThumbsup" parameterType="com.mkkang.mbti_with_music.domain.UserMusic">
         INSERT INTO

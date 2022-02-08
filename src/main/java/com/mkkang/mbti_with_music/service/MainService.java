@@ -10,10 +10,11 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.mkkang.mbti_with_music.domain.MusicInfo;
 import com.mkkang.mbti_with_music.domain.UserMusic;
-import com.mkkang.mbti_with_music.mapper.MainMapper;
+import com.mkkang.mbti_with_music.domain.UserMBTIResult;
 import com.mkkang.mbti_with_music.domain.UserMBTI;
+import com.mkkang.mbti_with_music.mapper.MainMapper;
 
-
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -24,6 +25,8 @@ public class MainService {
 
     UserMBTI userMBTI = new UserMBTI();
 
+    UserMBTIResult userMBTIResult = new UserMBTIResult();
+
     @Value("${key}")
     private String key;
 
@@ -31,7 +34,7 @@ public class MainService {
         List<MusicInfo> musicList = mainMapper.allMusic();
         return musicList;
     }
-    
+
     public Object searchMusic(String music_name) {
         WebClient webClient = WebClient.create("https://www.googleapis.com/youtube/v3/search");
         Mono<Object> searchedMusic = webClient.get()
@@ -45,15 +48,15 @@ public class MainService {
                         .build())
                 .retrieve()
                 .bodyToMono(Object.class);
-        //TODO: 결과값 정제해서 보내기
+        // TODO: 결과값 정제해서 보내기
         return searchedMusic.block();
     }
-    
+
     public int musicRecommendation(UserMusic userMusic) {
         return mainMapper.musicRecommendation(userMusic);
     }
 
-    public int musicThumbsup(UserMusic userMusic) {        
+    public int musicThumbsup(UserMusic userMusic) {
         System.out.println("thumbs-up service start");
         int musicExist = mainMapper.isMusicExist(userMusic.getMusic_id());
         int insertMusic = 0;
@@ -66,17 +69,17 @@ public class MainService {
         }
         return mainMapper.musicThumbsup(userMusic);
     }
-    
+
     public MusicInfo[] mbtiMusic(String MBTI_name) {
         MusicInfo[] results = mainMapper.getMbtiMusic(MBTI_name);
-        for (MusicInfo r: results){
+        for (MusicInfo r : results) {
             r.getMusic_id();
         }
         return results;
     }
 
     public UserMBTI mbtiResult(String question_set, int[] answer) {
-        //특정 set에 대한 문항 정보 가져오기
+        // 특정 set에 대한 문항 정보 가져오기
         // weight[], 4가지 unit에 대한 summation
         // UserMBTI userMBTI
 
@@ -102,7 +105,7 @@ public class MainService {
                 J += val;
             }
         }
-        
+
         E = E / unit_total[0];
         N = N / unit_total[1];
         T = T / unit_total[2];
@@ -113,26 +116,37 @@ public class MainService {
         topResult += (T >= 0) ? "T" : "F";
         topResult += (J >= 0) ? "J" : "P";
 
-        double[] topResultDetail={Math.abs(E),Math.abs(N),Math.abs(T),Math.abs(J)};
+        double[] topResultDetail = { Math.abs(E), Math.abs(N), Math.abs(T), Math.abs(J) };
+
+        Date time = new Date();
+
+        userMBTIResult.setMbti(topResult);
+        userMBTIResult.setEI(E);
+        userMBTIResult.setNS(N);
+        userMBTIResult.setTF(T);
+        userMBTIResult.setJP(J);
+        userMBTIResult.setTime(time);
+
+        mainMapper.insertMbtiResult(userMBTIResult);
 
         /*
-        ENTJ    ++++
-        ENTP    +++-
-        ENFJ    ++-+
-        ENFP    ++--
-        ESTJ    +-++
-        ESTP    +-+-
-        ESFJ    +--+
-        ESFP    +---
-        ISFP    ----
-        ISFJ    ---+
-        ISTP    --+-
-        ISTJ    --++
-        INFP    -+--
-        INFJ    -+-+
-        INTP    -++-
-        INTJ    -+++        
-        */
+         * ENTJ ++++
+         * ENTP +++-
+         * ENFJ ++-+
+         * ENFP ++--
+         * ESTJ +-++
+         * ESTP +-+-
+         * ESFJ +--+
+         * ESFP +---
+         * ISFP ----
+         * ISFJ ---+
+         * ISTP --+-
+         * ISTJ --++
+         * INFP -+--
+         * INFJ -+-+
+         * INTP -++-
+         * INTJ -+++
+         */
 
         double ENTJ = (+E + N + T + J + 4) / 8 * 100;
         double ENTP = (+E + N + T - J + 4) / 8 * 100;
@@ -152,22 +166,22 @@ public class MainService {
         double INTJ = (-E + N + T + J + 4) / 8 * 100;
 
         double[] allResult = {
-            ENTJ,
-            ENTP,
-            ENFJ,
-            ENFP,
-            ESTJ,
-            ESTP,
-            ESFJ,
-            ESFP,
-            ISFP,
-            ISFJ,
-            ISTP,
-            ISTJ,
-            INFP,
-            INFJ,
-            INTP,
-            INTJ
+                ENTJ,
+                ENTP,
+                ENFJ,
+                ENFP,
+                ESTJ,
+                ESTP,
+                ESFJ,
+                ESFP,
+                ISFP,
+                ISFJ,
+                ISTP,
+                ISTJ,
+                INFP,
+                INFJ,
+                INTP,
+                INTJ
         };
 
         userMBTI.setTopResult(topResult);
@@ -176,5 +190,5 @@ public class MainService {
 
         return userMBTI;
     }
-    
+
 }
