@@ -27,7 +27,6 @@ import org.json.JSONException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-
 @RestController
 public class MainController {
 
@@ -72,7 +71,7 @@ public class MainController {
         int musicResult = mainService.musicRecommendation(userMusic);
         return musicResult;
     }
-    
+
     // music table에 pass 여부 column필요
     @RequestMapping(method = RequestMethod.POST, path = "/music/thumbs-up")
     public int musicThumbsup(@RequestBody UserMusic userMusic) {
@@ -84,11 +83,11 @@ public class MainController {
 
     // @RequestMapping(method=RequestMethod.POST, path="/mbti-results")
     // public List<MusicInfo> mbtiResult(@RequestBody UserMusic userMusic) {
-    //     List<MusicInfo> mbti_results = mainService.mbtiMusic(userMusic);
-    //     return mbti_results;
+    // List<MusicInfo> mbti_results = mainService.mbtiMusic(userMusic);
+    // return mbti_results;
     // }
     // String[] listType = new TypeToken<String[]>() {}.getType();
-    
+
     @RequestMapping(method = RequestMethod.POST, path = "/mbti-results")
     public String mbtiResult(@RequestBody UserMBTI userMBTI) {
 
