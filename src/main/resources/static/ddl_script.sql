@@ -31,7 +31,7 @@ CREATE TABLE `mbti_result` (
   `result_id` int(11) NOT NULL AUTO_INCREMENT,
   `mbti` char(4) DEFAULT NULL,
   `EI` float DEFAULT NULL,
-  `SN` float DEFAULT NULL,
+  `NS` float DEFAULT NULL,
   `TF` float DEFAULT NULL,
   `JP` float DEFAULT NULL,
   `time` datetime DEFAULT NULL,
