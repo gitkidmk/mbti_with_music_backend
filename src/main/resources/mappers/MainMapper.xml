@@ -17,6 +17,12 @@
             )
     </insert>
 
+    <select id="isSessionMusicExist" resultType="int" parameterType="string">
+        SELECT count(*) FROM mbti_music_great
+        WHERE music_id = #{music_id}
+        AND session_id = #{session_id}
+    </select>
+
     <select id="isMusicExist" resultType="int" parameterType="string">
         SELECT count(*) FROM music
         WHERE music_id = #{music_id}

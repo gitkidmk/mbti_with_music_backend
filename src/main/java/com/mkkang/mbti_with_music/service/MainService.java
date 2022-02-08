@@ -1,6 +1,8 @@
 package com.mkkang.mbti_with_music.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
@@ -17,6 +19,15 @@ import com.mkkang.mbti_with_music.mapper.MainMapper;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+
 @Service
 public class MainService {
 
@@ -29,6 +40,35 @@ public class MainService {
 
     @Value("${key}")
     private String key;
+
+    public String generateAuthToken() {
+        String token = null;
+        try {
+            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            secureRandom
+                    .setSeed(secureRandom.generateSeed(128));
+            token = new String(
+                    digest.digest(
+                            (secureRandom.nextLong() + "")
+                                    .getBytes()));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return token;
+    }
+
+    
+     public String checkSession() {
+         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
+                 .getRequestAttributes()).getRequest();
+         HttpSession httpSession = request.getSession();
+         String uuid = generateAuthToken();
+         System.out.println("uuid is..." + uuid);
+         httpSession.setAttribute("USER", uuid);
+         String session_id = httpSession.getAttribute("USER").toString();
+         return session_id;
+     }
 
     public List<MusicInfo> allMusic() {
         List<MusicInfo> musicList = mainMapper.allMusic();
@@ -57,16 +97,30 @@ public class MainService {
     }
 
     public int musicThumbsup(UserMusic userMusic) {
-        System.out.println("thumbs-up service start");
+        // session 있으면 패스, session없으면 생성 로직-> session_id 반환
+        String res = this.checkSession();
+        System.out.println("Session USER : " + res);
         int musicExist = mainMapper.isMusicExist(userMusic.getMusic_id());
+        System.out.println("Session USER in MusicVo : " + userMusic.getSession_id());
+
         int insertMusic = 0;
-        // 있으면 1 없으면 0인가??? >> count로 체크하면 가능?
-        System.out.println("musicExist" + musicExist);
         if (musicExist == 0) {
             // videoId만 주기??
+//            userMusic.setSession_id(res);
             insertMusic = mainMapper.insertNewMusic(userMusic);
             System.out.println("insertMusic" + insertMusic);
         }
+
+
+        // 좋아요 표시한 사람이 너냐?
+        // 좋아요 한 음악 id와 session_id가 있을 때 deny
+
+        int likeExist = mainMapper.isSessionMusicExist(userMusic.getMusic_id(), res);
+        if(likeExist != 0) {
+            return 0;
+        }
+
+        userMusic.setSession_id(res);
         return mainMapper.musicThumbsup(userMusic);
     }
 

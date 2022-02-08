@@ -11,11 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
@@ -28,6 +24,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 @RestController
+@SessionAttributes("USER")
 public class MainController {
 
     @Autowired
@@ -73,6 +70,7 @@ public class MainController {
     }
 
     // music table에 pass 여부 column필요
+//    @ModelAttribute("USER")
     @RequestMapping(method = RequestMethod.POST, path = "/music/thumbs-up")
     public int musicThumbsup(@RequestBody UserMusic userMusic) {
         System.out.println("thumbs-up START");

@@ -20,6 +20,8 @@ public interface MainMapper {
 
     public int insertMbtiResult(UserMBTIResult userMBTIResult);
 
+    public int isSessionMusicExist(String music_id, String session_id);
+
     public int musicThumbsup(UserMusic userMusic);
 
     public MusicInfo[] getMbtiMusic(String mbti_name);
