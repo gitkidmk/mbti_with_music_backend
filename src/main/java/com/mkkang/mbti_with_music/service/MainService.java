@@ -63,10 +63,7 @@ public class MainService {
          HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
                  .getRequestAttributes()).getRequest();
          HttpSession httpSession = request.getSession();
-         String uuid = generateAuthToken();
-         System.out.println("uuid is..." + uuid);
-         httpSession.setAttribute("USER", uuid);
-         String session_id = httpSession.getAttribute("USER").toString();
+         String session_id = httpSession.getId();
          return session_id;
      }
 
@@ -98,29 +95,19 @@ public class MainService {
 
     public int musicThumbsup(UserMusic userMusic) {
         // session 있으면 패스, session없으면 생성 로직-> session_id 반환
-        String res = this.checkSession();
-        System.out.println("Session USER : " + res);
-        int musicExist = mainMapper.isMusicExist(userMusic.getMusic_id());
-        System.out.println("Session USER in MusicVo : " + userMusic.getSession_id());
+        String session_id = this.checkSession();
+        userMusic.setSession_id(session_id);
 
-        int insertMusic = 0;
+        int musicExist = mainMapper.isMusicExist(userMusic.getMusic_id());
+
         if (musicExist == 0) {
-            // videoId만 주기??
-//            userMusic.setSession_id(res);
-            insertMusic = mainMapper.insertNewMusic(userMusic);
-            System.out.println("insertMusic" + insertMusic);
+            mainMapper.insertNewMusic(userMusic);
         }
 
-
-        // 좋아요 표시한 사람이 너냐?
-        // 좋아요 한 음악 id와 session_id가 있을 때 deny
-
-        int likeExist = mainMapper.isSessionMusicExist(userMusic.getMusic_id(), res);
+        int likeExist = mainMapper.isSessionMusicExist(userMusic);
         if(likeExist != 0) {
             return 0;
         }
-
-        userMusic.setSession_id(res);
         return mainMapper.musicThumbsup(userMusic);
     }
 

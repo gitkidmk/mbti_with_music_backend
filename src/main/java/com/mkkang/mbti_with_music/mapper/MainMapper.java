@@ -20,7 +20,7 @@ public interface MainMapper {
 
     public int insertMbtiResult(UserMBTIResult userMBTIResult);
 
-    public int isSessionMusicExist(String music_id, String session_id);
+    public int isSessionMusicExist(UserMusic userMusic);
 
     public int musicThumbsup(UserMusic userMusic);
 

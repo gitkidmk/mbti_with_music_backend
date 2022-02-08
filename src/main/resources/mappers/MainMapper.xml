@@ -17,7 +17,7 @@
             )
     </insert>
 
-    <select id="isSessionMusicExist" resultType="int" parameterType="string">
+    <select id="isSessionMusicExist" resultType="int" parameterType="com.mkkang.mbti_with_music.domain.UserMusic">
         SELECT count(*) FROM mbti_music_great
         WHERE music_id = #{music_id}
         AND session_id = #{session_id}

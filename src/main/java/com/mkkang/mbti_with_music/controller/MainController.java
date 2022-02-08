@@ -6,6 +6,9 @@ import com.mkkang.mbti_with_music.domain.UserMBTI;
 import com.mkkang.mbti_with_music.service.MainService;
 
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
 import java.util.LinkedHashMap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -69,10 +72,8 @@ public class MainController {
         return musicResult;
     }
 
-    // music table에 pass 여부 column필요
-//    @ModelAttribute("USER")
     @RequestMapping(method = RequestMethod.POST, path = "/music/thumbs-up")
-    public int musicThumbsup(@RequestBody UserMusic userMusic) {
+    public int musicThumbsup(@RequestBody UserMusic userMusic, HttpServletRequest request) {
         System.out.println("thumbs-up START");
         int thumbsupResult = mainService.musicThumbsup(userMusic);
         System.out.println("thumbs-up END");
