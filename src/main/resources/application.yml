@@ -2,8 +2,8 @@ spring:
   datasource:
     url: jdbc:mariadb://db:3306/mbti_music
     driverClassName: org.mariadb.jdbc.Driver
-    username: root
-    password: mariadb
+    username: mbti_music
+    password: mbti_music
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     hibernate:
