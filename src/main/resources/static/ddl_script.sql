@@ -1,4 +1,14 @@
+-- mysql -u root -p mariadb
+
+-- DB 생성
 create database mbti_music;
+
+-- user 생성
+create user 'mbti_music'@'%' identified by 'mbti_music';
+grant all privileges on mbti_music.* to 'mbti_music'@'%';
+flush privileges;
+
+-- mysql -u mbti_music -p mbti_music
 
 -- mbti_music.mbti_music_user definition
 
