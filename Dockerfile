@@ -1,15 +1,9 @@
-FROM dockermkkang/mbti_backend:0.2
+FROM openjdk:19-jdk-alpine3.15
 
-COPY build/libs/mbti_with_music_backend-0.0.1-SNAPSHOT.jar /root/backendJar/
-COPY src/main/resources/application.yml /root/backendJar/
-COPY src/main/resources/application-KEY.yml /root/backendJar/
+COPY build/libs/mbti_with_music_backend-0.0.1-SNAPSHOT.jar /usr/share
+COPY src/main/resources/application.yml /usr/share
+COPY src/main/resources/application-KEY.yml /usr/share
 
-# git clone을 해와야 한다?
+WORKDIR /usr/share
 
-
-COPY start-back.sh /
-
-
-# RUN chmod +x /start-back.sh
-
-ENTRYPOINT ["sh", "/start-back.sh"]
+CMD ["java", "-jar", "mbti_with_music_backend-0.0.1-SNAPSHOT.jar", "--spring.config.location=./application.yml,./application-KEY.yml"]
