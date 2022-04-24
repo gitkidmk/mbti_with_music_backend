@@ -76,7 +76,7 @@
     </select>
 
     <select id="getUnitTotal" resultType="int" parameterType="string">
-        SELECT sum(mq.weight) from  mbti_question mq
+        SELECT sum(abs(mq.weight)) from  mbti_question mq
         WHERE mq.question_set = #{question_set}
         GROUP BY mq.unit
         ORDER BY field(mq.unit, 'E', 'N', 'T', 'J');
