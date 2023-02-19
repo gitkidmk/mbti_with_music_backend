@@ -4,8 +4,6 @@ spring:
     driverClassName: org.mariadb.jdbc.Driver
     username: mbti_music
     password: mbti_music
-  session:
-    store-type: jdbc
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     hibernate:
