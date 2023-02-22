@@ -10,10 +10,12 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface MainMapper {
+    // TODO: 파일 못나누나?
     public List<MusicInfo> allMusic();
 
     public int musicRecommendation(UserMusic userMusic);
 
+    //TODO: boolean으로 못받나?
     public int isMusicExist(String music_id);
 
     public int insertNewMusic(UserMusic userMusic);

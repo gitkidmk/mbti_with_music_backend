@@ -26,6 +26,7 @@ import org.json.JSONException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+// TODO: SESSIONATTRIBUTES에 대해 사용 안하는 것으로 추정
 @RestController
 @SessionAttributes("USER")
 public class MainController {
@@ -33,20 +34,21 @@ public class MainController {
     @Autowired
     private MainService mainService;
 
+    // TODO: 안쓰는 서비스
     @RequestMapping(method = RequestMethod.GET, path = "/")
     public List<MusicInfo> oneMember() {
         List<MusicInfo> musicResult = mainService.allMusic();
 
         return musicResult;
     }
-
+    // TODO: allMusic이 아닌 musics로 ? (복수 형태 맞추기)
     @RequestMapping(method = RequestMethod.GET, path = "/allMusic")
     public List<MusicInfo> allMember() {
         List<MusicInfo> musicResult = mainService.allMusic();
 
         return musicResult;
     }
-
+    // TODO: youtube-music 은 어떨까
     @RequestMapping(method = RequestMethod.GET, path = "/music/search")
     public Object searchMusic(@RequestParam(value = "music_name") String music_name) {
         System.out.println("searching music...");
@@ -65,7 +67,7 @@ public class MainController {
         return music_result;
     }
 
-    // 없어도 되는 api
+    // TODO: 없어도 되는 api
     @RequestMapping(method = RequestMethod.POST, path = "/music/recommendation")
     public int musicRecommendation(@RequestBody UserMusic userMusic) {
         int musicResult = mainService.musicRecommendation(userMusic);
