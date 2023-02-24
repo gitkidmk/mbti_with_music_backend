@@ -1,8 +1,6 @@
 package com.mkkang.mbti_with_music.controller;
 
-import com.mkkang.mbti_with_music.domain.MusicInfo;
-import com.mkkang.mbti_with_music.domain.UserMusic;
-import com.mkkang.mbti_with_music.domain.UserMBTI;
+import com.mkkang.mbti_with_music.dto.*;
 import com.mkkang.mbti_with_music.service.MainService;
 
 import java.util.List;
@@ -34,54 +32,24 @@ public class MainController {
     @Autowired
     private MainService mainService;
 
-    // TODO: 안쓰는 서비스
-    @RequestMapping(method = RequestMethod.GET, path = "/")
-    public List<MusicInfo> oneMember() {
-        List<MusicInfo> musicResult = mainService.allMusic();
-
-        return musicResult;
+    @RequestMapping(method = RequestMethod.GET, path = "/musics")
+    public List<MbtiMusicDTO> getAllMusic() {
+        List<MbtiMusicDTO> musicList = mainService.getAllMusic();
+        return musicList;
     }
-    // TODO: allMusic이 아닌 musics로 ? (복수 형태 맞추기)
-    @RequestMapping(method = RequestMethod.GET, path = "/allMusic")
-    public List<MusicInfo> allMember() {
-        List<MusicInfo> musicResult = mainService.allMusic();
 
-        return musicResult;
-    }
-    // TODO: youtube-music 은 어떨까
-    @RequestMapping(method = RequestMethod.GET, path = "/music/search")
-    public Object searchMusic(@RequestParam(value = "music_name") String music_name) {
+    @RequestMapping(method = RequestMethod.GET, path = "/musics/search")
+    public List<MusicDTO> searchMusic(@RequestParam(value = "music_name") String music_name) {
         System.out.println("searching music...");
-        Object music_result = mainService.searchMusic(music_name);
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            String result = objectMapper.writeValueAsString(music_result);
-            JSONParser jsonResult = new JSONParser(result);
-            LinkedHashMap<String, Object> json = jsonResult.object();
-            music_result = json.get("items");
-        } catch (JsonProcessingException e) {
-            System.out.println(e);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return music_result;
+        return mainService.searchMusic(music_name);
     }
 
-    // TODO: 없어도 되는 api
-    @RequestMapping(method = RequestMethod.POST, path = "/music/recommendation")
-    public int musicRecommendation(@RequestBody UserMusic userMusic) {
-        int musicResult = mainService.musicRecommendation(userMusic);
-        return musicResult;
-    }
-
-    @RequestMapping(method = RequestMethod.POST, path = "/music/thumbs-up")
-    public int musicThumbsup(@RequestBody UserMusic userMusic, HttpServletRequest request) {
-        System.out.println("thumbs-up START");
-        int thumbsupResult = mainService.musicThumbsup(userMusic);
-        System.out.println("thumbs-up END");
+    @RequestMapping(method = RequestMethod.POST, path = "/musics/like")
+    public boolean musicThumbsup(@RequestBody UserMusic userMusic, HttpServletRequest request) {
+        boolean thumbsupResult = mainService.musicThumbsup(userMusic);
         return thumbsupResult;
     }
-    @RequestMapping(method = RequestMethod.POST, path = "/mbti-results")
+    @RequestMapping(method = RequestMethod.POST, path = "/results")
     public String mbtiResult(@RequestBody UserMBTI userMBTI) {
 
         UserMBTI mbti_result = mainService.mbtiResult(userMBTI.getQuestion_set(), userMBTI.getAnswer());

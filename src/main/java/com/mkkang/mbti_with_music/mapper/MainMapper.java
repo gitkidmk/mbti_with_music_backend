@@ -2,29 +2,27 @@ package com.mkkang.mbti_with_music.mapper;
 
 import java.util.List;
 
-import com.mkkang.mbti_with_music.domain.MusicInfo;
-import com.mkkang.mbti_with_music.domain.UserMBTIResult;
-import com.mkkang.mbti_with_music.domain.UserMusic;
+import com.mkkang.mbti_with_music.dto.*;
 
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface MainMapper {
     // TODO: 파일 못나누나?
-    public List<MusicInfo> allMusic();
+    public List<MbtiMusicDTO> getAllMusic();
 
     public int musicRecommendation(UserMusic userMusic);
 
     //TODO: boolean으로 못받나?
-    public int isMusicExist(String music_id);
+    public boolean isMusicExist(String music_id);
 
     public int insertNewMusic(UserMusic userMusic);
 
     public int insertMbtiResult(UserMBTIResult userMBTIResult);
 
-    public int isSessionMusicExist(UserMusic userMusic);
+    public boolean isSessionMusicExist(UserMusic userMusic);
 
-    public int musicThumbsup(UserMusic userMusic);
+    public boolean musicThumbsup(UserMusic userMusic);
 
     public MusicInfo[] getMbtiMusic(String mbti_name);
 

@@ -4,41 +4,40 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
 <mapper namespace="com.mkkang.mbti_with_music.mapper.MainMapper">
-    <select id="allMusic" resultType="com.mkkang.mbti_with_music.domain.MusicInfo">
-        SELECT * FROM music
+    <select id="getAllMusic" resultType="com.mkkang.mbti_with_music.dto.MbtiMusicDTO">
+        SELECT mmg.music_id, mmg.mbti_name, m.music_name , m.description, m.thumbnail, count(mmg.music_id) as likes
+        from mbti_music_great mmg
+        inner join music m
+        WHERE mmg.music_id = m.music_id
+        group by mmg.music_id
+        order by likes DESC
     </select>
 
-    <insert id="musicRecommendation" parameterType="com.mkkang.mbti_with_music.domain.UserMusic">
-        INSERT INTO
-        mbti_music_user(music_id, mbti_name)
-        VALUES(
-            #{music_id}, 
-            #{mbti_name}
-            )
-    </insert>
-
-    <select id="isSessionMusicExist" resultType="int" parameterType="com.mkkang.mbti_with_music.domain.UserMusic">
-        SELECT count(*) FROM mbti_music_great
+    <select id="isSessionMusicExist" resultType="boolean" parameterType="com.mkkang.mbti_with_music.dto.UserMusic">
+        SELECT IF(COUNT(*) = 1, 1, 0)
+        FROM mbti_music_great
         WHERE music_id = #{music_id}
         AND session_id = #{session_id}
     </select>
 
-    <select id="isMusicExist" resultType="int" parameterType="string">
-        SELECT count(*) FROM music
+    <select id="isMusicExist" resultType="boolean" parameterType="string">
+        SELECT IF(COUNT(*) = 1, 1, 0)
+        FROM music
         WHERE music_id = #{music_id}
     </select>
     
-    <insert id="insertNewMusic" parameterType="com.mkkang.mbti_with_music.domain.UserMusic">
+    <insert id="insertNewMusic" parameterType="com.mkkang.mbti_with_music.dto.MusicInfo">
         INSERT into
         music(music_id, music_name, thumbnail)
         VALUES(
             #{music_id},
             #{music_name},
+            #{description},
             #{thumbnail}
             )
     </insert>
     
-    <insert id="insertMbtiResult" parameterType="com.mkkang.mbti_with_music.domain.UserMBTIResult">
+    <insert id="insertMbtiResult" parameterType="com.mkkang.mbti_with_music.dto.UserMBTIResult">
         INSERT into
         mbti_result(mbti, EI, NS, TF, JP, time)
         VALUES(
@@ -51,7 +50,7 @@
             )
     </insert>
 
-    <insert id="musicThumbsup" parameterType="com.mkkang.mbti_with_music.domain.UserMusic">
+    <insert id="musicThumbsup" parameterType="com.mkkang.mbti_with_music.dto.UserMusic">
         INSERT INTO
         mbti_music_great(music_id, session_id, mbti_name)
         VALUES(
@@ -61,7 +60,7 @@
             )
     </insert>
 
-    <select id="getMbtiMusic" resultType="com.mkkang.mbti_with_music.domain.MusicInfo" parameterType="string">
+    <select id="getMbtiMusic" resultType="com.mkkang.mbti_with_music.dto.MusicInfo" parameterType="string">
         SELECT m.music_id, m.music_name, m.album, m.artist, m.thumbnail, count(mmg.mbti_music_great_id) as great_count
         FROM music m, mbti_music_great mmg
         WHERE m.music_id = mmg.music_id

@@ -1,4 +1,4 @@
-package com.mkkang.mbti_with_music.domain;
+package com.mkkang.mbti_with_music.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

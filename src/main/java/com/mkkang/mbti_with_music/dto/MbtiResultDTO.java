@@ -1,15 +1,11 @@
-package com.mkkang.mbti_with_music.domain;
-
-import java.util.Date;
+package com.mkkang.mbti_with_music.dto;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.util.Date;
 
 @Getter
-@Setter
-@NoArgsConstructor
-public class UserMBTIResult {
+public class MbtiResultDTO {
+
     private String mbti;
 
     private double EI;
