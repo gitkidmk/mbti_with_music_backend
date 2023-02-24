@@ -40,7 +40,6 @@ public class MainController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/musics/search")
     public List<MusicDTO> searchMusic(@RequestParam(value = "music_name") String music_name) {
-        System.out.println("searching music...");
         return mainService.searchMusic(music_name);
     }
 
