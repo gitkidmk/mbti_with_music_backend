@@ -1,10 +1,11 @@
 package com.mkkang.mbti_with_music.service;
 
 import com.mkkang.mbti_with_music.dto.*;
+import com.mkkang.mbti_with_music.vo.MbtiAnalysisVO;
+import com.mkkang.mbti_with_music.vo.MusicCardVO;
+import com.mkkang.mbti_with_music.vo.RawDataVO;
 import org.json.JSONException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
@@ -16,14 +17,6 @@ import com.mkkang.mbti_with_music.mapper.MainMapper;
 
 import java.util.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-
-import static com.mkkang.mbti_with_music.service.SessionService.checkSession;
 import static java.util.stream.Collectors.toMap;
 
 @Service
@@ -32,22 +25,13 @@ public class MainService {
     @Autowired
     private MainMapper mainMapper;
 
-    UserMBTI userMBTI = new UserMBTI();
-
-    UserMBTIResult userMBTIResult = new UserMBTIResult();
-
     @Value("${key}")
     private String key;
 
-    public List<MbtiMusicDTO> getAllMusic() {
-        List<MbtiMusicDTO> musicList = mainMapper.getAllMusic();
-        return musicList;
-    }
-
-
-    public List<MusicDTO> searchMusic(String music_name) {
+    public GetMusicsSearchDTO.Response searchMusic(String music_name) {
         YouTubeDataDTO rawData = callYoutubeAPI(music_name);
-        return refiningData(rawData);
+        GetMusicsSearchDTO.Response response = new GetMusicsSearchDTO().new Response(refiningData(rawData));
+        return response;
     }
 
     private YouTubeDataDTO callYoutubeAPI(String music_name) {
@@ -66,13 +50,13 @@ public class MainService {
         return searchedMusic.block();
     }
 
-    private List<MusicDTO> refiningData(YouTubeDataDTO rawDataList) throws JSONException {
-        List<MusicDTO> refinedData = new ArrayList<>();
+    private List<MusicCardVO> refiningData(YouTubeDataDTO rawDataList) throws JSONException {
+        List<MusicCardVO> refinedData = new ArrayList<>();
 
-        List<RawDataDTO> dataList =  rawDataList.getItems();
+        List<RawDataVO> dataList =  rawDataList.getItems();
 
-        for (RawDataDTO data : dataList) {
-            MusicDTO music = MusicDTO.builder()
+        for (RawDataVO data : dataList) {
+            MusicCardVO music = MusicCardVO.builder()
                     .music_id(data.getId().getVideoId())
                     .music_name(data.getSnippet().getTitle())
                     .description(data.getSnippet().getDescription())
@@ -84,39 +68,50 @@ public class MainService {
     }
 
 
-    public boolean musicThumbsup(UserMusic userMusic) {
+    public PostMusicLikeDTO.Response postMusicLike(PostMusicLikeDTO.Request request) {
         // session 있으면 패스, session없으면 생성 로직-> session_id 반환
-        String session_id = checkSession();
-        userMusic.setSession_id(session_id);
+        String session_id = SessionService.checkSession();
+        PostMusicLikeServiceDTO postMusicLikeServiceDTO = PostMusicLikeServiceDTO.builder()
+                .music_id(request.getMusic_id())
+                .mbti_name(request.getMbti_name())
+                .session_id(session_id)
+                .build();
 
-        boolean musicExist = mainMapper.isMusicExist(userMusic.getMusic_id());
+        boolean musicExist = mainMapper.getMusicExistence(request.getMusic_id());
         if (!musicExist) {
-            mainMapper.insertNewMusic(userMusic);
+            PostMusicDTO postMusicDTO = PostMusicDTO.builder()
+                    .music_id(request.getMusic_id())
+                    .music_name(request.getMusic_name())
+                    .description(request.getDescription())
+                    .thumbnail(request.getThumbnail())
+                    .build();
+            mainMapper.postMusic(postMusicDTO);
         }
 
-        boolean likeExist = mainMapper.isSessionMusicExist(userMusic);
-        if(likeExist) {
-            return false;
+        GetMusicLikedExistenceDTO getMusicLikedExistenceDTO = new GetMusicLikedExistenceDTO(request.getMusic_id(), session_id);
+        boolean likeExist = mainMapper.getMusicLikedExistence(getMusicLikedExistenceDTO);
+        boolean accepted = false;
+
+        if(!likeExist) {
+            accepted = mainMapper.postMusicLike(postMusicLikeServiceDTO);
         }
-        return mainMapper.musicThumbsup(userMusic);
+        PostMusicLikeDTO.Response response = new PostMusicLikeDTO().new Response(accepted);
+
+        return response;
     }
 
-    public MusicInfo[] mbtiMusic(String MBTI_name) {
-        MusicInfo[] results = mainMapper.getMbtiMusic(MBTI_name);
-        for (MusicInfo r : results) {
-            r.getMusic_id();
-        }
+    public MusicCardVO[] getMbtiMusics(String mbti_name) {
+        MusicCardVO[] results = mainMapper.getMbtiMusic(mbti_name);
         return results;
     }
 
-    public UserMBTI mbtiResult(String question_set, int[] answer) {
-        // 특정 set에 대한 문항 정보 가져오기
-        // weight[], 4가지 unit에 대한 summation
-        // UserMBTI userMBTI
+    public MbtiAnalysisVO postMbtiResult(PostResultsDTO.Request request) {
+        String question_set = request.getQuestion_set();
+        int[] answers = request.getAnswers();
 
         int[] weight = mainMapper.getWeight(question_set);
         int[] unit_total = mainMapper.getUnitTotal(question_set);
-        String topResult = "";
+        String topType = "";
 
         double E, N, T, J;
         E = 0;
@@ -124,8 +119,8 @@ public class MainService {
         T = 0;
         J = 0;
 
-        for (int i = 0; i < answer.length; i++) {
-            int val = weight[i] * answer[i];
+        for (int i = 0; i < answers.length; i++) {
+            int val = weight[i] * answers[i];
             if (i % 4 == 0) {
                 E += val;
             } else if (i % 4 == 1) {
@@ -142,23 +137,25 @@ public class MainService {
         T = T / unit_total[2];
         J = J / unit_total[3];
 
-        topResult += (E >= 0) ? "E" : "I";
-        topResult += (N >= 0) ? "N" : "S";
-        topResult += (T >= 0) ? "T" : "F";
-        topResult += (J >= 0) ? "J" : "P";
+        topType += (E >= 0) ? "E" : "I";
+        topType += (N >= 0) ? "N" : "S";
+        topType += (T >= 0) ? "T" : "F";
+        topType += (J >= 0) ? "J" : "P";
 
-        double[] topResultDetail = { Math.abs(E), Math.abs(N), Math.abs(T), Math.abs(J) };
+        double[] topTypeDetail = { Math.abs(E), Math.abs(N), Math.abs(T), Math.abs(J) };
 
         Date time = new Date();
 
-        userMBTIResult.setMbti(topResult);
-        userMBTIResult.setEI(E);
-        userMBTIResult.setNS(N);
-        userMBTIResult.setTF(T);
-        userMBTIResult.setJP(J);
-        userMBTIResult.setTime(time);
+        PostResultsServiceDTO postResultsServiceDTO = PostResultsServiceDTO.builder()
+                .mbti(topType)
+                .EI(E)
+                .NS(N)
+                .TF(T)
+                .JP(J)
+                .time(time)
+                .build();
 
-        mainMapper.insertMbtiResult(userMBTIResult);
+        mainMapper.postResult(postResultsServiceDTO);
 
         /*
          * ENTJ ++++
@@ -215,11 +212,23 @@ public class MainService {
                 INTJ
         };
 
-        userMBTI.setTopResult(topResult);
-        userMBTI.setAllResult(allResult);
-        userMBTI.setTopResultDetail(topResultDetail);
+        MbtiAnalysisVO mbtiAnalysisVO = MbtiAnalysisVO.builder()
+                .topType(topType)
+                .topTypeDetail(topTypeDetail)
+                .entireTypeRough(allResult)
+                .build();
 
-        return userMBTI;
+        return mbtiAnalysisVO;
+    }
+
+    public PostResultsDTO.Response postResults(PostResultsDTO.Request request) {
+        MbtiAnalysisVO mbti = postMbtiResult(request);
+        MusicCardVO[] musics = getMbtiMusics(mbti.getTopType());
+        PostResultsDTO.Response response = PostResultsDTO.Response.builder()
+                .mbti(mbti)
+                .musics(musics)
+                .build();
+        return response;
     }
 
 }

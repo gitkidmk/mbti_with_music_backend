@@ -1,10 +1,11 @@
 package com.mkkang.mbti_with_music.dto;
 
-import lombok.Getter;
+import lombok.Builder;
+
 import java.util.Date;
 
-@Getter
-public class MbtiResultDTO {
+@Builder
+public class PostResultsServiceDTO {
 
     private String mbti;
 

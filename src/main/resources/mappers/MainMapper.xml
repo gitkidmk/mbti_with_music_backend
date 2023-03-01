@@ -4,15 +4,6 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
 <mapper namespace="com.mkkang.mbti_with_music.mapper.MainMapper">
-    <select id="getAllMusic" resultType="com.mkkang.mbti_with_music.dto.MbtiMusicDTO">
-        SELECT mmg.music_id, mmg.mbti_name, m.music_name , m.description, m.thumbnail, count(mmg.music_id) as likes
-        from mbti_music_great mmg
-        inner join music m
-        WHERE mmg.music_id = m.music_id
-        group by mmg.music_id
-        order by likes DESC
-    </select>
-
     <select id="isSessionMusicExist" resultType="boolean" parameterType="com.mkkang.mbti_with_music.dto.UserMusic">
         SELECT IF(COUNT(*) = 1, 1, 0)
         FROM mbti_music_great

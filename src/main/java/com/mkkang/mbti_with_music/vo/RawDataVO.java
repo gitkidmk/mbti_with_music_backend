@@ -1,9 +1,9 @@
-package com.mkkang.mbti_with_music.dto;
+package com.mkkang.mbti_with_music.vo;
 
 import lombok.Getter;
 
 @Getter
-public class RawDataDTO {
+public class RawDataVO {
     String kind;
     String etag;
     Id id;
