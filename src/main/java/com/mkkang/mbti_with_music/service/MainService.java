@@ -88,14 +88,14 @@ public class MainService {
             mainMapper.postMusic(postMusicDTO);
         }
 
-        GetMusicLikedExistenceDTO getMusicLikedExistenceDTO = new GetMusicLikedExistenceDTO(request.getMusic_id(), session_id);
-        boolean likeExist = mainMapper.getMusicLikedExistence(getMusicLikedExistenceDTO);
+        GetMusicLikedExistenceServiceDTO getMusicLikedExistenceServiceDTO = new GetMusicLikedExistenceServiceDTO(request.getMusic_id(), session_id);
+        boolean likeExist = mainMapper.getMusicLikedExistence(getMusicLikedExistenceServiceDTO);
         boolean accepted = false;
 
         if(!likeExist) {
             accepted = mainMapper.postMusicLike(postMusicLikeServiceDTO);
         }
-        PostMusicLikeDTO.Response response = new PostMusicLikeDTO().new Response(accepted);
+        PostMusicLikeDTO.Response response = new PostMusicLikeDTO.Response(accepted);
 
         return response;
     }

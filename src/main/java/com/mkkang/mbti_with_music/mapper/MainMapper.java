@@ -1,7 +1,5 @@
 package com.mkkang.mbti_with_music.mapper;
 
-import java.util.List;
-
 import com.mkkang.mbti_with_music.dto.*;
 
 import com.mkkang.mbti_with_music.vo.MusicCardVO;
@@ -17,7 +15,7 @@ public interface MainMapper {
 
     public int postResult(PostResultsServiceDTO postResultsServiceDTO);
 
-    public boolean getMusicLikedExistence(GetMusicLikedExistenceDTO getMusicLikedExistenceDTO);
+    public boolean getMusicLikedExistence(GetMusicLikedExistenceServiceDTO getMusicLikedExistenceServiceDTO);
 
     public boolean postMusicLike(PostMusicLikeServiceDTO postMusicLikeServiceDTO);
 

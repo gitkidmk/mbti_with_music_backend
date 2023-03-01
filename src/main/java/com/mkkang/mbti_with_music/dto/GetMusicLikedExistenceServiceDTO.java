@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class GetMusicLikedExistenceDTO {
+public class GetMusicLikedExistenceServiceDTO {
     private String music_id;
     private String session_id;
 }

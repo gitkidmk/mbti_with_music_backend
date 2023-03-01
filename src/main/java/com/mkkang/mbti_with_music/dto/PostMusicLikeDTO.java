@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 public class PostMusicLikeDTO {
     @Getter
     @Builder
-    public class Request {
+    public static class Request {
         private String music_id;
         private String music_name;
         private String description;
@@ -20,7 +20,7 @@ public class PostMusicLikeDTO {
     @Getter
     @Builder
     @AllArgsConstructor
-    public class Response {
+    public static class Response {
         private boolean accepted;
     }
 

@@ -10,14 +10,14 @@ import java.util.List;
 
 public class PostResultsDTO {
     @Getter
-    public class Request {
+    public static class Request {
         private String question_set;
         private int[] answers;
     }
 
     @Getter
     @Builder
-    public class Response {
+    public static class Response {
         private MbtiAnalysisVO mbti;
         private MusicCardVO[] musics;
     }

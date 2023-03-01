@@ -4,20 +4,20 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
 <mapper namespace="com.mkkang.mbti_with_music.mapper.MainMapper">
-    <select id="isSessionMusicExist" resultType="boolean" parameterType="com.mkkang.mbti_with_music.dto.UserMusic">
+    <select id="getMusicLikedExistence" resultType="boolean" parameterType="com.mkkang.mbti_with_music.dto.GetMusicLikedExistenceServiceDTO">
         SELECT IF(COUNT(*) = 1, 1, 0)
         FROM mbti_music_great
         WHERE music_id = #{music_id}
         AND session_id = #{session_id}
     </select>
 
-    <select id="isMusicExist" resultType="boolean" parameterType="string">
+    <select id="getMusicExistence" resultType="boolean" parameterType="string">
         SELECT IF(COUNT(*) = 1, 1, 0)
         FROM music
         WHERE music_id = #{music_id}
     </select>
     
-    <insert id="insertNewMusic" parameterType="com.mkkang.mbti_with_music.dto.MusicInfo">
+    <insert id="postMusic" parameterType="com.mkkang.mbti_with_music.dto.PostMusicDTO">
         INSERT into
         music(music_id, music_name, thumbnail)
         VALUES(
@@ -28,7 +28,7 @@
             )
     </insert>
     
-    <insert id="insertMbtiResult" parameterType="com.mkkang.mbti_with_music.dto.UserMBTIResult">
+    <insert id="postResult" parameterType="com.mkkang.mbti_with_music.dto.PostResultsServiceDTO">
         INSERT into
         mbti_result(mbti, EI, NS, TF, JP, time)
         VALUES(
@@ -41,7 +41,7 @@
             )
     </insert>
 
-    <insert id="musicThumbsup" parameterType="com.mkkang.mbti_with_music.dto.UserMusic">
+    <insert id="postMusicLike" parameterType="com.mkkang.mbti_with_music.dto.PostMusicLikeServiceDTO">
         INSERT INTO
         mbti_music_great(music_id, session_id, mbti_name)
         VALUES(
@@ -51,8 +51,8 @@
             )
     </insert>
 
-    <select id="getMbtiMusic" resultType="com.mkkang.mbti_with_music.dto.MusicInfo" parameterType="string">
-        SELECT m.music_id, m.music_name, m.album, m.artist, m.thumbnail, count(mmg.mbti_music_great_id) as great_count
+    <select id="getMbtiMusic" resultType="com.mkkang.mbti_with_music.vo.MusicCardVO" parameterType="string">
+        SELECT m.music_id, m.music_name, m.description, m.thumbnail, mmg.mbti_name, count(mmg.mbti_music_great_id) as great_count
         FROM music m, mbti_music_great mmg
         WHERE m.music_id = mmg.music_id
         AND mmg.mbti_name = #{mbti_name}
