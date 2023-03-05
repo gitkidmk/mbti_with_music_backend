@@ -45,7 +45,7 @@ dependencies {
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux:2.6.1'
 	implementation 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
-	implementation group: 'org.json', name: 'json', version: '20090211'
+	implementation group: 'org.json', name: 'json', version: '20220924'
 	implementation 'com.google.code.gson:gson:2.8.7'
 	implementation 'org.springframework.session:spring-session-jdbc:2.3.0.RELEASE'
 

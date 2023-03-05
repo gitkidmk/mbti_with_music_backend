@@ -1,8 +1,11 @@
 package com.mkkang.mbti_with_music.service;
 
+import com.mkkang.mbti_with_music.dto.*;
+import com.mkkang.mbti_with_music.vo.MbtiAnalysisVO;
+import com.mkkang.mbti_with_music.vo.MusicCardVO;
+import com.mkkang.mbti_with_music.vo.RawDataVO;
+import org.json.JSONException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
@@ -10,23 +13,11 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.mkkang.mbti_with_music.domain.MusicInfo;
-import com.mkkang.mbti_with_music.domain.UserMusic;
-import com.mkkang.mbti_with_music.domain.UserMBTIResult;
-import com.mkkang.mbti_with_music.domain.UserMBTI;
 import com.mkkang.mbti_with_music.mapper.MainMapper;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
+import static java.util.stream.Collectors.toMap;
 
 @Service
 public class MainService {
@@ -34,47 +25,18 @@ public class MainService {
     @Autowired
     private MainMapper mainMapper;
 
-    UserMBTI userMBTI = new UserMBTI();
-
-    UserMBTIResult userMBTIResult = new UserMBTIResult();
-
     @Value("${key}")
     private String key;
 
-    public String generateAuthToken() {
-        String token = null;
-        try {
-            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            secureRandom
-                    .setSeed(secureRandom.generateSeed(128));
-            token = new String(
-                    digest.digest(
-                            (secureRandom.nextLong() + "")
-                                    .getBytes()));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return token;
+    public GetMusicsSearchDTO.Response searchMusic(String music_name) {
+        YouTubeDataDTO rawData = callYoutubeAPI(music_name);
+        GetMusicsSearchDTO.Response response = new GetMusicsSearchDTO().new Response(refiningData(rawData));
+        return response;
     }
 
-    
-     public String checkSession() {
-         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
-                 .getRequestAttributes()).getRequest();
-         HttpSession httpSession = request.getSession();
-         String session_id = httpSession.getId();
-         return session_id;
-     }
-
-    public List<MusicInfo> allMusic() {
-        List<MusicInfo> musicList = mainMapper.allMusic();
-        return musicList;
-    }
-
-    public Object searchMusic(String music_name) {
+    private YouTubeDataDTO callYoutubeAPI(String music_name) {
         WebClient webClient = WebClient.create("https://www.googleapis.com/youtube/v3/search");
-        Mono<Object> searchedMusic = webClient.get()
+        Mono<YouTubeDataDTO> searchedMusic = webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .queryParam("key", key)
                         .queryParam("part", "snippet")
@@ -84,49 +46,72 @@ public class MainService {
                         .queryParam("q", music_name)
                         .build())
                 .retrieve()
-                .bodyToMono(Object.class);
-        // TODO: 결과값 정제해서 보내기
+                .bodyToMono(YouTubeDataDTO.class);
         return searchedMusic.block();
     }
 
-    public int musicRecommendation(UserMusic userMusic) {
-        return mainMapper.musicRecommendation(userMusic);
+    private List<MusicCardVO> refiningData(YouTubeDataDTO rawDataList) throws JSONException {
+        List<MusicCardVO> refinedData = new ArrayList<>();
+
+        List<RawDataVO> dataList =  rawDataList.getItems();
+
+        for (RawDataVO data : dataList) {
+            MusicCardVO music = MusicCardVO.builder()
+                    .music_id(data.getId().getVideoId())
+                    .music_name(data.getSnippet().getTitle())
+                    .description(data.getSnippet().getDescription())
+                    .thumbnail(data.getSnippet().getThumbnails().getHigh().getUrl())
+                    .build();
+            refinedData.add(music);
+        }
+        return refinedData;
     }
 
-    public int musicThumbsup(UserMusic userMusic) {
+
+    public PostMusicLikeDTO.Response postMusicLike(PostMusicLikeDTO.Request request) {
         // session 있으면 패스, session없으면 생성 로직-> session_id 반환
-        String session_id = this.checkSession();
-        userMusic.setSession_id(session_id);
+        String session_id = SessionService.checkSession();
+        PostMusicLikeServiceDTO postMusicLikeServiceDTO = PostMusicLikeServiceDTO.builder()
+                .music_id(request.getMusic_id())
+                .mbti_name(request.getMbti_name())
+                .session_id(session_id)
+                .build();
 
-        int musicExist = mainMapper.isMusicExist(userMusic.getMusic_id());
-
-        if (musicExist == 0) {
-            mainMapper.insertNewMusic(userMusic);
+        boolean musicExist = mainMapper.getMusicExistence(request.getMusic_id());
+        if (!musicExist) {
+            PostMusicDTO postMusicDTO = PostMusicDTO.builder()
+                    .music_id(request.getMusic_id())
+                    .music_name(request.getMusic_name())
+                    .description(request.getDescription())
+                    .thumbnail(request.getThumbnail())
+                    .build();
+            mainMapper.postMusic(postMusicDTO);
         }
 
-        int likeExist = mainMapper.isSessionMusicExist(userMusic);
-        if(likeExist != 0) {
-            return 0;
+        GetMusicLikedExistenceServiceDTO getMusicLikedExistenceServiceDTO = new GetMusicLikedExistenceServiceDTO(request.getMusic_id(), session_id);
+        boolean likeExist = mainMapper.getMusicLikedExistence(getMusicLikedExistenceServiceDTO);
+        boolean accepted = false;
+
+        if(!likeExist) {
+            accepted = mainMapper.postMusicLike(postMusicLikeServiceDTO);
         }
-        return mainMapper.musicThumbsup(userMusic);
+        PostMusicLikeDTO.Response response = new PostMusicLikeDTO.Response(accepted);
+
+        return response;
     }
 
-    public MusicInfo[] mbtiMusic(String MBTI_name) {
-        MusicInfo[] results = mainMapper.getMbtiMusic(MBTI_name);
-        for (MusicInfo r : results) {
-            r.getMusic_id();
-        }
+    public MusicCardVO[] getMbtiMusics(String mbti_name) {
+        MusicCardVO[] results = mainMapper.getMbtiMusic(mbti_name);
         return results;
     }
 
-    public UserMBTI mbtiResult(String question_set, int[] answer) {
-        // 특정 set에 대한 문항 정보 가져오기
-        // weight[], 4가지 unit에 대한 summation
-        // UserMBTI userMBTI
+    public MbtiAnalysisVO postMbtiResult(PostResultsDTO.Request request) {
+        String question_set = request.getQuestion_set();
+        int[] answers = request.getAnswers();
 
         int[] weight = mainMapper.getWeight(question_set);
         int[] unit_total = mainMapper.getUnitTotal(question_set);
-        String topResult = "";
+        String topType = "";
 
         double E, N, T, J;
         E = 0;
@@ -134,8 +119,8 @@ public class MainService {
         T = 0;
         J = 0;
 
-        for (int i = 0; i < answer.length; i++) {
-            int val = weight[i] * answer[i];
+        for (int i = 0; i < answers.length; i++) {
+            int val = weight[i] * answers[i];
             if (i % 4 == 0) {
                 E += val;
             } else if (i % 4 == 1) {
@@ -152,23 +137,25 @@ public class MainService {
         T = T / unit_total[2];
         J = J / unit_total[3];
 
-        topResult += (E >= 0) ? "E" : "I";
-        topResult += (N >= 0) ? "N" : "S";
-        topResult += (T >= 0) ? "T" : "F";
-        topResult += (J >= 0) ? "J" : "P";
+        topType += (E >= 0) ? "E" : "I";
+        topType += (N >= 0) ? "N" : "S";
+        topType += (T >= 0) ? "T" : "F";
+        topType += (J >= 0) ? "J" : "P";
 
-        double[] topResultDetail = { Math.abs(E), Math.abs(N), Math.abs(T), Math.abs(J) };
+        double[] topTypeDetail = { Math.abs(E), Math.abs(N), Math.abs(T), Math.abs(J) };
 
         Date time = new Date();
 
-        userMBTIResult.setMbti(topResult);
-        userMBTIResult.setEI(E);
-        userMBTIResult.setNS(N);
-        userMBTIResult.setTF(T);
-        userMBTIResult.setJP(J);
-        userMBTIResult.setTime(time);
+        PostResultsServiceDTO postResultsServiceDTO = PostResultsServiceDTO.builder()
+                .mbti(topType)
+                .EI(E)
+                .NS(N)
+                .TF(T)
+                .JP(J)
+                .time(time)
+                .build();
 
-        mainMapper.insertMbtiResult(userMBTIResult);
+        mainMapper.postResult(postResultsServiceDTO);
 
         /*
          * ENTJ ++++
@@ -225,11 +212,23 @@ public class MainService {
                 INTJ
         };
 
-        userMBTI.setTopResult(topResult);
-        userMBTI.setAllResult(allResult);
-        userMBTI.setTopResultDetail(topResultDetail);
+        MbtiAnalysisVO mbtiAnalysisVO = MbtiAnalysisVO.builder()
+                .topType(topType)
+                .topTypeDetail(topTypeDetail)
+                .entireTypeRough(allResult)
+                .build();
 
-        return userMBTI;
+        return mbtiAnalysisVO;
+    }
+
+    public PostResultsDTO.Response postResults(PostResultsDTO.Request request) {
+        MbtiAnalysisVO mbti = postMbtiResult(request);
+        MusicCardVO[] musics = getMbtiMusics(mbti.getTopType());
+        PostResultsDTO.Response response = PostResultsDTO.Response.builder()
+                .mbti(mbti)
+                .musics(musics)
+                .build();
+        return response;
     }
 
 }

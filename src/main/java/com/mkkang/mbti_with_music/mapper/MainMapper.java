@@ -1,30 +1,25 @@
 package com.mkkang.mbti_with_music.mapper;
 
-import java.util.List;
+import com.mkkang.mbti_with_music.dto.*;
 
-import com.mkkang.mbti_with_music.domain.MusicInfo;
-import com.mkkang.mbti_with_music.domain.UserMBTIResult;
-import com.mkkang.mbti_with_music.domain.UserMusic;
-
+import com.mkkang.mbti_with_music.vo.MusicCardVO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface MainMapper {
-    public List<MusicInfo> allMusic();
+    // TODO: 파일 못나누나?
+    //TODO: boolean으로 못받나?
+    public boolean getMusicExistence(String music_id);
 
-    public int musicRecommendation(UserMusic userMusic);
+    public int postMusic(PostMusicDTO postMusicDTO);
 
-    public int isMusicExist(String music_id);
+    public int postResult(PostResultsServiceDTO postResultsServiceDTO);
 
-    public int insertNewMusic(UserMusic userMusic);
+    public boolean getMusicLikedExistence(GetMusicLikedExistenceServiceDTO getMusicLikedExistenceServiceDTO);
 
-    public int insertMbtiResult(UserMBTIResult userMBTIResult);
+    public boolean postMusicLike(PostMusicLikeServiceDTO postMusicLikeServiceDTO);
 
-    public int isSessionMusicExist(UserMusic userMusic);
-
-    public int musicThumbsup(UserMusic userMusic);
-
-    public MusicInfo[] getMbtiMusic(String mbti_name);
+    public MusicCardVO[] getMbtiMusic(String mbti_name);
 
     public int[] getWeight(String question_set);
 
