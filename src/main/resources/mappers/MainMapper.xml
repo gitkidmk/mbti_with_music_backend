@@ -19,7 +19,7 @@
     
     <insert id="postMusic" parameterType="com.mkkang.mbti_with_music.dto.PostMusicDTO">
         INSERT into
-        music(music_id, music_name, thumbnail)
+        music(music_id, music_name, description, thumbnail)
         VALUES(
             #{music_id},
             #{music_name},
