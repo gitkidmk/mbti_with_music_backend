@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: "jdbc:mariadb://${DB_HOST}:3306/mbti_music"
+    driverClassName: org.mariadb.jdbc.Driver
+    username: mbti_music
+    password: mbti_music
+  session:
+    store-type: jdbc
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    hibernate:
+      ddl-auto: update
+  profiles:
+    include:
+      - KEY
+
+mybatis:
+  type-aliases-package: com.mkkang.mbti_with_music.domain
+  mapper-locations: mappers/*.xml
+  configuration:
+    # multiple-result-sets-enabled: false
+    # map-underscore-to-camel-case: true
+    call-setters-on-nulls: true
+    jdbc-type-for-null: varchar
+    default-fetch-size: 500
+
+server:
+  port: 4000

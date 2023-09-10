@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.mkkang.mbti_with_music.mapper.MainMapper">
+    <select id="getMusicLikedExistence" resultType="boolean" parameterType="com.mkkang.mbti_with_music.dto.GetMusicLikedExistenceServiceDTO">
+        SELECT IF(COUNT(*) = 1, 1, 0)
+        FROM mbti_music_great
+        WHERE music_id = #{music_id}
+        AND session_id = #{session_id}
+    </select>
+
+    <select id="getMusicExistence" resultType="boolean" parameterType="string">
+        SELECT IF(COUNT(*) = 1, 1, 0)
+        FROM music
+        WHERE music_id = #{music_id}
+    </select>
+    
+    <insert id="postMusic" parameterType="com.mkkang.mbti_with_music.dto.PostMusicDTO">
+        INSERT into
+        music(music_id, music_name, description, thumbnail)
+        VALUES(
+            #{music_id},
+            #{music_name},
+            #{description},
+            #{thumbnail}
+            )
+    </insert>
+    
+    <insert id="postResult" parameterType="com.mkkang.mbti_with_music.dto.PostResultsServiceDTO">
+        INSERT into
+        mbti_result(mbti, EI, NS, TF, JP, time)
+        VALUES(
+            #{mbti},
+            #{EI},
+            #{NS},
+            #{TF},
+            #{JP},
+            #{time}
+            )
+    </insert>
+
+    <insert id="postMusicLike" parameterType="com.mkkang.mbti_with_music.dto.PostMusicLikeServiceDTO">
+        INSERT INTO
+        mbti_music_great(music_id, session_id, mbti_name)
+        VALUES(
+            #{music_id}, 
+            #{session_id},
+            #{mbti_name}
+            )
+    </insert>
+
+    <select id="getMbtiMusic" resultType="com.mkkang.mbti_with_music.vo.MusicCardVO" parameterType="string">
+        SELECT m.music_id, m.music_name, m.description, m.thumbnail, mmg.mbti_name, count(mmg.mbti_music_great_id) as great_count
+        FROM music m, mbti_music_great mmg
+        WHERE m.music_id = mmg.music_id
+        AND mmg.mbti_name = #{mbti_name}
+        GROUP BY m.music_id
+    </select>
+
+    <select id="getWeight" resultType="int" parameterType="string">
+        SELECT mq.weight from mbti_question mq
+        WHERE mq.question_set = #{question_set}
+        ORDER BY mq.id;
+    </select>
+
+    <select id="getUnitTotal" resultType="int" parameterType="string">
+        SELECT sum(abs(mq.weight)) from  mbti_question mq
+        WHERE mq.question_set = #{question_set}
+        GROUP BY mq.unit
+        ORDER BY field(mq.unit, 'E', 'N', 'T', 'J');
+    </select>
+
+</mapper>
